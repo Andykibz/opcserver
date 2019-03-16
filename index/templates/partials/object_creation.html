@@ -1,0 +1,89 @@
+<div class="col-3">
+    <div class="object-list-wrapper col-12">
+        <div class="heading row">
+            <h3>
+                Objects
+            </h3>
+        </div>
+        <hr class="row mb-2 mt-1" style="background-color:#ccc;margin-left:-1.5em;margin-right:-1.5em" >
+        <div class="div-table-body "><!--Beginning of Body-->
+            {% if objects %}
+            {% for object in objects %}
+                <div class="mb-2">
+                    {% if object.is_parent() %}  
+
+                        <span class="span-row row "><!--Begin Row-->
+                            <form id="min-object-form-{{ object.id }}" class="d-none" action="{{ url_for('delete_object') }}" method="POST" >                    
+                                <input type="hidden" name="server_id" value="{{ object.server.id }}">
+                                <input type="hidden" name="object_id" value="{{ object.id }}">
+                            </form>
+                            <span class="span-cell">{{ object.name }}</span><!--Cell-->
+                            <span class="span-cell"><!--Begin Cell-->
+                                <a data-target="min-object-form-{{ object.id }}" class="btn btn-sm btn-warning del-obj-btn" href="#">Delete</a>
+                            </span><!--End Cell-->
+                        </span><!--End Row-->
+
+                        
+                        
+                            {% for child_obj in object.get_child_objects() %}
+                                <span class=" span-row child-object mt-1 "><!--Begin Row-->
+                                    <form id="min-object-form-{{ child_obj.id }}" class="d-none" action="{{ url_for('delete_object') }}" method="POST" >             
+                                        <input type="hidden" name="server_id" value="{{ child_obj.server.id }}">
+                                        <input type="hidden" name="object_id" value="{{ child_obj.id }}">
+                                    </form>
+                                    <span class="span-cell"> <i style="position:relative;width:10px;top:3px" data-feather="corner-down-right"></i> {{ child_obj.name }}</span><!--Cell-->
+                                    <span class="span-cell"><!--Begin Cell-->
+                                        <a data-target="min-object-form-{{ child_obj.id }}" class="btn btn-sm btn-warning del-obj-btn" href="#">Delete</a>
+                                    </span><!--End Cell-->
+                                </span>
+                            {% endfor %}
+                    
+                            <hr class="row mb-3 mt-1" style="background-color:#ccc;">
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="2" class="text-center"> No Objects Defined Yet </td>
+
+                </tr>
+            {% endif %}
+            </div>
+    </div>
+    <hr>
+    <form id="object_form" class="" method="post" action="{{url_for('create_object')}}">
+        {{ objform.csrf_token }}
+        
+        <div class="col-12 mb-3">
+            {{ objform.object_name.label( class="form-control-label" ) }}
+            {{ objform.object_name( class="form-control", value="" ) }}
+        </div>
+        
+        <div class="col-12 mb-3">
+            
+            <label class="form-control-label">Parent Object</label>
+            <select name="parent_object" class="form-control">
+                {% if objects  %}
+                    <option value='' >Select Parent Object</option>
+                    {% for obj in objects %}
+                        {% if obj.is_parent() %}
+                            <option value="{{ obj.id }}" >{{ obj.name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <option value="" >No Objects Defined</option>
+                {% endif %}
+
+            </select>
+        </div>
+                
+        <div class="col-12 mb-3">
+            {# {{ objform.server.label( class="form-control-label" ) }} #}
+            {{ objform.server( class="form-control",value="{}".format(server.id) ) }}
+        </div>
+        
+        <div class="col-12">
+            {{ objform.submit( class="form-control btn btn-outline-info" ) }}
+        </div>
+    </form>
+</div>

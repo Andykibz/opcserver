@@ -1,0 +1,36 @@
+<form class="" action="{{url_for('create_variable')}}" method="POST" id="variable_form"  >
+    {{ varform.hidden_tag() }}    
+    <div class="form-wrapper col-sm-8 offset-sm-2 col-12">
+        <legend class="text-center">Add New Variable</legend>
+        <div class="form-row">
+            <div class="col-sm-6 col-12 mb-3">
+                {{ varform.name( class="form-control",value="" ) }}
+            </div>
+            <div class="col-sm-6 col-12 mb-3" >
+                {{ varform.tag( class="form-control p-1",value="", style="font-size:1em!important;") }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-sm-6 col-12 mb-3">
+                {{ varform.var_type( class="form-control",value="" ) }}
+            </div>
+            <div id="value-wrapper" class="col-sm-6 col-12 mb-3">
+                {{ varform.value( class="form-control" ) }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-sm-6 col-12 mb-3">
+                <div class="custom-control custom-checkbox">
+                    {{ varform.writable( class="custom-control-input",) }}
+                    <label class="custom-control-label" for="check_writable">Writable</label>
+                </div>
+            </div>
+            <div class="col-sm-6 col-12 mb-3">
+                {{ varform.var_object( class="custom-select custom-select-md" ) }}
+            </div>
+        </div>
+        <div class="col-12">
+            {{ varform.submit( class="form-control btn-outline-info" ) }}
+        </div>
+    </div>
+</form>

@@ -1,0 +1,29 @@
+<!Doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <title>OPC Server</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    {% include('partials/nav.html') %}
+    <div id="content" class="container-fluid">
+      {% block content %}
+
+      {% endblock %}
+    </div>
+    {% block javascripts %}
+      <script src="{{ url_for('static', filename='jquery.js') }}" type="text/javascript"></script>
+      <script src="{{ url_for('static', filename='popper.js') }}" type="text/javascript"></script>
+      <script src="{{ url_for('static', filename='bootstrap.min.js') }}" type="text/javascript"></script>
+      <script src="{{ url_for('static', filename='styles.js') }}" type="text/javascript"></script>
+      <script src="{{ url_for('static', filename='feather.min.js') }}" type="text/javascript"></script>
+      <script>
+          feather.replace()
+        </script>
+    {% endblock %}
+  </body>
+  </html>

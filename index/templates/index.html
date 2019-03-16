@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block content %}
+<div id="alerts-wrapper" class="">
+
+</div>
+<!-- <div id="" class="alert d-none alert-dismissible fade show alert-box" role="alert">
+    <span class="alert-message">  </span>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div> -->
+
+  <form id="projects_form" class="d-block mb-3" method="post" action="{{url_for('create_server')}}" class="d-block mb-10" >
+      {{ form.hidden_tag() }}
+      <div class="form-row">
+        <div class="col-4 mb-3">
+          {{ form.server_name.label( class="form-control-label" ) }}
+          {{ form.server_name( class="form-control", value="" ) }}
+        </div>
+
+        <div class="col-4 input-group mb-3">
+          {{ form.endpoint_url.label( class="form-control-label" ) }}
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="inputGroupPrepend">ocp.tcp://</span>
+              {{ form.endpoint_url(class="form-control col-12", value="") }}
+            </div>
+          </div>
+        </div>
+
+        <div class="col-4 mb-3">
+          {{ form.namespace.label( class="form-control-label" ) }}
+          {{ form.namespace( class="form-control",value="" ) }}
+        </div>
+      </div>
+
+      <div class="form-row">
+        {{ form.submit( class="form-control btn btn-outline-info col-6 offset-3" ) }}
+      </div>
+  </form>
+  <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Server Name</th>
+          <th scope="col">Endpont Url</th>
+          <th scope="col">Namespace</th>
+          <th scope="col">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if servers %}
+        {% for server in servers %}
+        <tr>
+          <th scope="row">{{ server.id }}</th>
+          <td>{{ server.name }}</td>
+          <td>{{ server.endpoint_url }}</td>
+          <td>{{ server.namespace }}</td>
+          <td>
+              <p>
+                <a class="btn btn-sm btn-info" href="{{ url_for('server_populate',serverid=server.id) }}">Populate</a>
+                <a class="btn btn-sm btn-primary" href="#">Start</a>
+                <a class="btn btn-sm btn-danger" href="#">Stop</a>
+                <a class="btn btn-sm btn-warning" href="#">Delete</a>
+              </p>
+          </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+{% endblock %}

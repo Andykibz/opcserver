@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+    <div id="alert-message" class="alert alert-{{ category }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="row">
+    {% include('partials/object_creation.html') %}
+
+<div class="col-9">
+        {% if objects %}
+        <table class="table">
+            <thead class="thead-light">
+                <tr class="row">
+                    <th scope="col" class="col-2" >Name</th>
+                    <th scope="col" class="col-1" >Tag_ID</th>
+                    <th scope="col" class="col-2" >Type</th>
+                    <th scope="col" class="col-1" >Writable</th>
+                    <th scope="col" class="col-2" >Object Name</th>
+                    <th scope="col" class="col-2" >Value</th>
+                    <th scope="col" class="col-2" >Action</th>
+                </tr>
+            </thead>
+            <tbody id="var-body">
+                {% for obj in objects %}
+                    {% for variable in obj.variables %}
+                        <tr id="var-{{ variable.id }}" class="row">
+                            <td class="col-2 pb-0">{{variable.name}}</td>
+                            <td class="col-1 pb-0">{{ variable.tag_id }}</td>
+                            <td class="col-2 pb-0" >{{ variable.type }}</td>
+                            <td class="col-1 pb-0" > 
+                                {% if variable.writable %}  <i data-feather="check"></i> {% else %} <i data-feather="x-circle"></i> {% endif %}
+                            </td>
+                            <td class="col-2 pb-0" >{{ variable.object.name }}</td>
+                            <td class="col-2 pb-0" >{{ variable.value }}</td>
+                            <td class="col-2 pb-0" >
+                                <p>
+                                    <a data-name="{{ variable.name }}" data-id="{{ variable.id }}" class="btn btn-danger btn-sm var-del-btn" href="{{ url_for('delete_var',var_id=variable.id ) }}"> Delete </i> </a>
+                                </p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+                {# {% for variable in variables %}
+                {% endfor %} #}
+            </tbody>
+        </table>
+        <hr>
+                {% include "partials/variable_creation.html" %}
+        {% endif %}
+</div>
+</div>
+
+{% endblock %}}
+{% block javascripts %}
+    {{ super() }}
+    <script>
+        $('#var_type').on('change',function(e){
+            vtype = $(this).val()
+            switch(vtype){
+                case 'int':
+                    $('#value-wrapper').html(
+                        '<input class="form-control" id="value" name="value" placeholder="Value" required="" type="number" value=0>'
+                    )
+                    break;
+
+                case 'string':
+                    $('#value-wrapper').html(
+                        '<input class="form-control" id="value" name="value" placeholder="Your String" required="" type="text" value="">'
+                    )                 
+                    break;   
+
+                case 'bool':
+                    $('#value-wrapper').html(
+                        '<div class="custom-control custom-radio custom-control-inline">\
+                            <input type="radio" class="custom-control-input" id="trueval" name="value" value="True">\
+                            <label class="custom-control-label" for="trueval">True</label>\
+                        </div>\
+                        <div class="custom-control custom-radio custom-control-inline">\
+                            <input type="radio" class="custom-control-input" id="falseval" name="value" value="False">\
+                            <label class="custom-control-label" for="falseval">False</label>\
+                        </div>'
+                    )
+                    break;
+
+                case 'float':
+                    $('#value-wrapper').html(
+                        '<input class="form-control" id="value" name="value" placeholder="0.0" required="" type="number" value="0.0">'
+                    )
+                    break;
+                                                        
+
+            }
+            
+        });
+    </script>
+{% endblock %}
+
