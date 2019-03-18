@@ -3,6 +3,15 @@ from index import app,db
 from index.models import Server,Object, Variable
 from index.forms import ServerCreateForm,ObjectCreateForm,VariableCreateForm
 from . import utils
+from myserver import MyServer
+ms = MyServer()
+
+# class OPC():
+#     def startserver():
+#         def __init__( id ):
+#             self.id =
+#             MyServer()
+            
 
 @app.route("/")
 def home():
@@ -14,17 +23,26 @@ def home():
 def create_server():
     form = ServerCreateForm()
     if form.validate_on_submit():
-        server = Server( name=form.server_name.data, endpoint_url=form.endpoint_url.data,namespace=form.endpoint_url.data )
+        server = Server( name=form.server_name.data, endpoint_url=form.endpoint_url.data,namespace=form.namespace.data )
         db.session.add(server)
         db.session.commit()
         resp = {
-            'message' : f'{ form.server_name.data } Created Successfully',
+            'message' : '{} Created Successfully'.format(form.server_name.data),
             'servers' : Server.query.all()
         }
         return redirect(url_for('home'))
-        # return jsonify(resp)
 
     return jsonify(data=form.errors)
+
+@app.route("/server/delete/<serverid>",methods= ['POST'] )    
+def delete_server( serverid ):
+    server = Server.query.get( serverid )
+    servername = server.name
+    db.session.delete(server)
+    db.session.commit()
+    flash('{} Deleted SUccessfully'.format(servername), 'success')
+    return redirect(url_for('create_server'))
+
 
 @app.route("/server/<serverid>",methods= ['GET'] )
 def server_populate(serverid):
@@ -41,7 +59,16 @@ def server_populate(serverid):
              objform = ObjectCreateForm(),
              varform=varform
     )
+@app.route("/start_server/<serverid>",methods=['GET'])
+def start_server(serverid):
+    global ms
+    ms.initialise(serverid)
+    return jsonify( ms.opc_server.start())
     
+
+@app.route("/stop_server/<serverid>",methods=['GET'])
+def stop_server(serverid):
+    ms.opc_server.stop()
 
 @app.route("/create_object",methods= ['POST'] )
 def create_object():
@@ -76,7 +103,7 @@ def create_variable():
         db.session.add(var)
         db.session.commit()
         resp={
-            'message' : f' {var.name} Created Successfully',
+            'message' : '{} Created Successfully'.format(var.name),
             'object'  : varform.data
         }
         # return jsonify(resp)

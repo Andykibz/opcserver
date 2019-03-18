@@ -7,17 +7,17 @@ class Server(db.Model):
     endpoint_url = db.Column( db.String(120), unique=True, nullable=False )
     namespace = db.Column( db.String(120), nullable=True, )
     created_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow )
-    objects = db.relationship('Object',backref='server')
+    objects = db.relationship('Object',backref='server',cascade="all, delete-orphan" , lazy='dynamic')
 
     def __repr__( self ):
-        return f"Server: '{self.name}'"
+        return "Server: ".foramt(self.name)
 
 class Object(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column( db.String(120), nullable=False )
     parent_id = db.Column( db.Integer, nullable=True )
     server_id = db.Column(db.Integer,db.ForeignKey('server.id',ondelete='CASCADE'),nullable=False)
-    variables = db.relationship("Variable", backref="object")
+    variables = db.relationship("Variable", backref="object", cascade="all, delete-orphan" , lazy='dynamic' )
 
     def has_child( self ):    
         return True if Object.query.filter_by(parent_id=self.id) else False
@@ -29,7 +29,7 @@ class Object(db.Model):
         return self.query.filter_by(parent_id=self.id) if Object.query.filter_by(parent_id=self.id) else False
 
     def __repr__( self ):
-        return f"Object: '{self.name}'"
+        return "Object: ".foramt(self.name)
 
 class Variable(db.Model):
     id = db.Column( db.Integer, primary_key=True )
@@ -41,4 +41,4 @@ class Variable(db.Model):
     object_id = db.Column(db.Integer,db.ForeignKey('object.id',ondelete='CASCADE'),nullable=False )
 
     def __repr__( self ):
-        return f"Variable: '{ self.name }'"
+        return "Variable: {}".format(self.name)

@@ -2,24 +2,25 @@ from opcua import Server as UAServer
 from index.models import Server,Object,Variable
 from index.utils import convert_val
 
-choices=[ ( '','Select Type' ), ( 'int', 'Integer' ),( 'bool', 'Boolean' ),('float','Floating Point'),('string','String') ]
-
 class MyServer:    
     '''
         initialise opcua server object
     '''
-    def __init__( self, server_id ):
-        self.opc_server_id = server_id
-        self.db_server_obj=Server.query.get( server_id )
+    def __init__( self ):
         self.opc_server = UAServer()  # OPC UA server instance
         self.opc_objects_dict = {}
         self.opc_variables_dict = {}
-        self.instantiate_server_vars()
 
     '''
      Instantiate all server related variables from the Sqlite DB server 
      to the opcua server instance
     '''
+    def initialise( self, server_id ):
+        self.opc_server_id = server_id
+        self.db_server_obj=Server.query.get( server_id )
+        self.instantiate_server_vars()
+
+
     def instantiate_server_vars( self ):
         self.opc_server_endpoint = "opc.tcp://"+self.db_server_obj.endpoint_url
         self.opc_server_name = self.db_server_obj.name
@@ -50,14 +51,8 @@ class MyServer:
     def load_object_variables(self, variables, object_owner):
         for variable in variables:
             self.opc_variables_dict[variable.id] = object_owner.add_variable( self.ns_idx, variable.name, convert_val(variable.value,variable.type ) )
-
-
-
-
-
-
-
-
+            if variable.writable:
+                self.opc_variables_dict[variable.id].set_writable()
 
     def start_opc_server(self):
         self.opc_server.start()

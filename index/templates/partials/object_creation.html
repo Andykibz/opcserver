@@ -13,7 +13,8 @@
                     {% if object.is_parent() %}  
 
                         <span class="span-row row "><!--Begin Row-->
-                            <form id="min-object-form-{{ object.id }}" class="d-none" action="{{ url_for('delete_object') }}" method="POST" >                    
+                            <form id="min-object-form-{{ object.id }}" class="d-none" action="{{ url_for('delete_object') }}" method="POST" >
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>                              
                                 <input type="hidden" name="server_id" value="{{ object.server.id }}">
                                 <input type="hidden" name="object_id" value="{{ object.id }}">
                             </form>
@@ -23,11 +24,10 @@
                             </span><!--End Cell-->
                         </span><!--End Row-->
 
-                        
-                        
                             {% for child_obj in object.get_child_objects() %}
                                 <span class=" span-row child-object mt-1 "><!--Begin Row-->
-                                    <form id="min-object-form-{{ child_obj.id }}" class="d-none" action="{{ url_for('delete_object') }}" method="POST" >             
+                                    <form id="min-object-form-{{ child_obj.id }}" class="d-none" action="{{ url_for('delete_object') }}" method="post" >
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>             
                                         <input type="hidden" name="server_id" value="{{ child_obj.server.id }}">
                                         <input type="hidden" name="object_id" value="{{ child_obj.id }}">
                                     </form>

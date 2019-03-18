@@ -21,7 +21,7 @@ class ServerCreateForm( FlaskForm ):
 
     namespace = StringField('Namespace',
                                 render_kw = {
-                                            'placeholder': "Project Name"
+                                            'placeholder': "Namespace"
                                         }
                                 )
 
