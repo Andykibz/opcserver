@@ -10,7 +10,7 @@ class Server(db.Model):
     objects = db.relationship('Object',backref='server',cascade="all, delete-orphan" , lazy='dynamic')
 
     def __repr__( self ):
-        return "Server: ".foramt(self.name)
+        return "Server: {}".format(self.name)
 
 class Object(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -29,7 +29,7 @@ class Object(db.Model):
         return self.query.filter_by(parent_id=self.id) if Object.query.filter_by(parent_id=self.id) else False
 
     def __repr__( self ):
-        return "Object: ".foramt(self.name)
+        return "Object: {}".format(self.name)
 
 class Variable(db.Model):
     id = db.Column( db.Integer, primary_key=True )

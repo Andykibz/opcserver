@@ -11,14 +11,37 @@
     {% endif %}
   {% endwith %}
 </div>
-<!-- Large modal -->
-<div class="modal fade config-server-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      
+<!-- Modal -->
+<div class="modal fade config-server-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <form method="POST" id="config-server-form" class="mx-3 mt-2 mb-3">
+          <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalCenterTitle">Config Server</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+          </div><!--Modal Title-->
+          <div class="modal-body">
+            <div id="msgs"></div>
+                <input type="hidden" id="start_server_csrf" name="csrf_token" value="{{ csrf_token() }}"/>
+                <input type="hidden" name="serverID" />
+                <div class="form-group">
+                    <label for="input-ip">PLC Address</label>
+                    <input type="text" id="input-ip" class="form-control" name="plc_ip" placeholder="default: 192.168.0.1">              
+                </div>
+              </div>
+              <div class="modal-footer">
+                  <a data-server-id="" class="btn btn-sm btn-primary start-server" href="#"><i data-feather="play-circle"></i></a>
+                  <a data-server-id="" class="btn btn-sm btn-danger stop-server" href="#"> <i data-feather="stop-circle"></i> </a>
+                    
+                <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button> -->
+          </form>
+        </div>
+      </div>
     </div>
   </div>
-</div>
 
   <form id="projects_form" class="d-block mb-3" method="post" action="{{url_for('create_server')}}" autocomplete=false >
       {{ form.hidden_tag() }}
@@ -69,9 +92,7 @@
           <td class="col-sm-3">
               <p>
                 <a class="btn btn-sm btn-secondary" href="{{ url_for('server_populate',serverid=server.id) }}"><i data-feather="edit"></i> </a>
-                <a data-toggle="modal" data-target="config-server-modal-lg" class="btn btn-sm btn-info" href="#"> <i data-feather="settings"></i> </a>
-                <a data-server-id="{{ server.id }}" class="btn btn-sm btn-primary start-server" href="#"><i data-feather="play-circle"></i></a>
-                <a data-server-id="{{ server.id }}" class="btn btn-sm btn-danger stop-server" href="#"> <i data-feather="stop-circle"></i> </a>
+                <a data-server-id="{{ server.id }}" data-toggle="modal" data-target=".config-server-modal" class="btn btn-sm btn-info config-server" href="#"> <i data-feather="settings"></i> </a>
                 <a data-server="{{ server.id }}" role="button" class="btn btn-sm btn-warning delete-server" href="#"><i data-feather="trash"></i></a>
               </p>
             </td>
@@ -96,19 +117,15 @@
             let serverid = $(this).attr('data-server');
             $('#del-server-form-'+serverid).trigger('submit') 
         });
-        $('.start-server').on('click', function(){
-            let serverid=$(this).attr('data-server-id')
-            $.get("start_server/"+serverid, function(data){
-              console.log(data)   
-            });
+        let csrf_token = "{{ csrf_token() }}"
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrf_token);
+                }
+            }
         });
-
-        $('.stop-server').on('click', function(){
-            let serverid=$(this).attr('data-server-id')
-            $.get("stop_server/"+serverid, function(data){
-              console.log(data)   
-            });
-        });
+       
     </script>
 {% endblock %}
 

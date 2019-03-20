@@ -4,14 +4,14 @@ from index.models import Server,Object, Variable
 from index.forms import ServerCreateForm,ObjectCreateForm,VariableCreateForm
 from . import utils
 from myserver import MyServer
-ms = MyServer()
+from myplc import MyPlc
+from snap7.snap7exceptions import Snap7Exception
 
-# class OPC():
-#     def startserver():
-#         def __init__( id ):
-#             self.id =
-#             MyServer()
-            
+global ms,mp
+ms = MyServer()
+mp = MyPlc()
+
+ctrl = Control()
 
 @app.route("/")
 def home():
@@ -59,16 +59,46 @@ def server_populate(serverid):
              objform = ObjectCreateForm(),
              varform=varform
     )
-@app.route("/start_server/<serverid>",methods=['GET'])
+@app.route("/start_server/<serverid>",methods=['POST'])
 def start_server(serverid):
     global ms
-    ms.initialise(serverid)
-    return jsonify( ms.opc_server.start())
-    
+    global mp
+    if request.method=='POST' and request.form: 
+
+        server = Server.query.get(request.form['server'])
+        plc_ip = request.form['plc_ip']
+        try:
+            if isinstance(ms, MyServer) is False:
+
+        except NameError as nexp:
+            return 
+            ms = MyServer(server.id)
+        try:
+            ms.opc_server.start()
+            if plc_ip is not None:
+                mp = MyPlc( server.id, plc_ip )
+            else:
+                mp = MyPlc( server.id )
+        except OSError as err:
+            return jsonify({ "danger" : "The address and port at {} are being used by sbd/sth else".format(server.endpoint_url) })
+        except Snap7Exception as snap:            
+            return jsonify({ 'danger' :[ x if len(str(x)) > 5 else None for x in snap.args ]})
+        except Exception as exp:
+            return jsonify( { 'danger': [ x if len(str(x)) > 5 else None for x in exp.args ]} ) 
+        else:
+            return jsonify({ "success": "SERVER: {}, started at: {}".format(server.name,server.endpoint_url)} )     
+    else:
+        return jsonify("Web Server Error")
+
 
 @app.route("/stop_server/<serverid>",methods=['GET'])
 def stop_server(serverid):
+    global ms
+    global mp
     ms.opc_server.stop()
+    mp.kill_threads()
+    del ms, mp
+    return jsonify({"info":"Server Stoped"})
 
 @app.route("/create_object",methods= ['POST'] )
 def create_object():
@@ -106,7 +136,6 @@ def create_variable():
             'message' : '{} Created Successfully'.format(var.name),
             'object'  : varform.data
         }
-        # return jsonify(resp)
         return redirect( url_for('server_populate',serverid=obj.server.id) )
     else:    
         flash('Could not create {} Variable'.format(varform.name.data))
@@ -131,4 +160,35 @@ def delete_object():
     flash('{} Deleted SUccessfully'.format(objName), 'success')
     return redirect(url_for('server_populate',serverid=server_id))
     
+def server_start_util(server, plc_ip ,myserv, myplc):
+    danger = []
+    info = []
+    if isinstance(myserv,MyServer):
+        # Check if OPC Server is running
+        if isOpen(server.endpoint_url):
+            info.append[ "Server running at opc.tcp://"+server.endpoint_url ]
+            try:
+                # Connect to PLC 
+                if plc_ip is not None:
+                    myplc = MyPlc( serverid,plc_ip )
+                else:
+                    myplc = MyPlc( serverid )
+                info.append(["PLC Connected"])
+            except:
+                danger.append["Couldn't connect top plc at: "+plc_ip ]
 
+        else:
+            danger.append([ "Server failed to start at opc.tcp://"+server.endpoint_url+". Check log file" ])
+            
+    else:
+        # try:
+        myserv = MyServer( server.id )   
+            # server_start_util(server, plc_ip ,myserv, myplc, MYSERV, MYPLC)
+        # except:
+        #     danger.append(["Couldn't launch server"])
+    
+    msgs = {
+        'danger' : danger,
+        'info' : info,
+    }
+    return myserv, myplc, msgs  
