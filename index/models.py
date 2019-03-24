@@ -1,44 +1,56 @@
 from datetime import datetime
 from index import db
+import logging
 
 class Server(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column( db.String(120), nullable=False )
-    endpoint_url = db.Column( db.String(120), unique=True, nullable=False )
-    namespace = db.Column( db.String(120), nullable=True, )
-    created_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow )
-    objects = db.relationship('Object',backref='server',cascade="all, delete-orphan" , lazy='dynamic')
+    server_name = db.Column( db.String(120), nullable=False )
+    server_endpoint_url = db.Column( db.String(120), unique=True, nullable=False )
+    server_namespace = db.Column( db.String(120), nullable=True, )
+    server_created_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow )
+    server_objects = db.relationship('Object',backref='server',cascade="all, delete-orphan" , lazy='dynamic')
 
     def __repr__( self ):
-        return "Server: {}".format(self.name)
+        return "Server: {}".format(self.server_name)
 
 class Object(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column( db.String(120), nullable=False )
-    parent_id = db.Column( db.Integer, nullable=True )
-    server_id = db.Column(db.Integer,db.ForeignKey('server.id',ondelete='CASCADE'),nullable=False)
-    variables = db.relationship("Variable", backref="object", cascade="all, delete-orphan" , lazy='dynamic' )
+    object_name = db.Column( db.String(120), nullable=False )
+    object_parent_id = db.Column( db.Integer, nullable=True )
+    object_server_id = db.Column(db.Integer,db.ForeignKey('server.id',ondelete='CASCADE'),nullable=False)
+    object_variables = db.relationship("Variable", backref="object", cascade="all, delete-orphan" , lazy='dynamic' )
 
     def has_child( self ):    
-        return True if Object.query.filter_by(parent_id=self.id) else False
+        return True if Object.query.filter_by(object_parent_id=self.id) else False
     
     def is_parent( self ):
-        return True if self.parent_id is None else False
+        return True if self.object_parent_id is None else False
+
+    def get_parent( self ):        
+        return Object.query.get( self.object_parent_id )
 
     def get_child_objects( self ):
-        return self.query.filter_by(parent_id=self.id) if Object.query.filter_by(parent_id=self.id) else False
+        return self.query.filter_by(object_parent_id=self.id) if Object.query.filter_by(object_parent_id=self.id) else False
 
     def __repr__( self ):
-        return "Object: {}".format(self.name)
+        return "Object: {}".format(self.object_name)
 
-class Variable(db.Model):
+class Variable( db.Model ):
     id = db.Column( db.Integer, primary_key=True )
-    name = db.Column( db.String(120), nullable=False )
-    type = db.Column( db.String(20), nullable=False )
-    writable = db.Column( db.Boolean(), nullable=False )
-    tag_id = db.Column( db.String(120), nullable=False, unique=True)
-    value = db.Column( db.String(100), nullable=False)
-    object_id = db.Column(db.Integer,db.ForeignKey('object.id',ondelete='CASCADE'),nullable=False )
+    variable_name = db.Column( db.String(120), nullable=False )
+    variable_type = db.Column( db.String(20), nullable=False )
+    variable_writable = db.Column( db.Boolean(), nullable=False )
+    variable_address = db.Column( db.String(120), nullable=False)
+    variable_value = db.Column( db.String(100), nullable=True)
+    variable_object_id = db.Column(db.Integer,db.ForeignKey('object.id',ondelete='CASCADE'),nullable=False )
 
+    @staticmethod
+    def validate( obj_id, address ):
+        allvarrs =  Object.query.get(obj_id).object_variables.all()
+        for var in allvarrs:
+            if var.variable_address == address :
+                return False
+        return True                
+                
     def __repr__( self ):
-        return "Variable: {}".format(self.name)
+        return "Variable: {}".format(self.variable_name)

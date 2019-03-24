@@ -4,10 +4,12 @@ $(document).ready(function(){
         e.preventDefault()
         id = $(this).attr('data-id')
         name = $(this).attr('data-name')
-        $.get( "/variables/"+id+"/delete", function( data ) {
-            alert( name+' '+data );
-            $('#var-'+id).remove()
-          });
+        delet = confirm("Do you really wish to delete "+name)
+        if ( delet == true ){
+            $.get( "/variables/"+id+"/delete", function( data ) {
+                $('#var-'+id).remove()
+            });
+        }
     });
 
     $('.del-obj-btn').on('click',function(e){
@@ -20,8 +22,8 @@ $(document).ready(function(){
     });
 
     $('.config-server').on('click',function(e){
-        let s_id = $(this).attr('data-server-id')
         e.preventDefault()
+        let s_id = $(this).attr('data-server-id')
         $('input[name="serverID"]').val(s_id)
 
     });
@@ -42,7 +44,7 @@ $(document).ready(function(){
             $.each(data, function(key, value){
                 // $('#alert-box').removeClass('d-none').addClass('alert-'+key)
                 // $('#server-response').text(value)
-                $('.modal-body').html('<div id="alert-box" class="alert alert-'+key+' alert-dismissible">\
+                $('#msgs').html('<div id="alert-box" class="alert alert-'+key+' alert-dismissible">\
                   <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>\
                   <span id="server-response">'+value+'</span>\
                </div>')
@@ -58,7 +60,7 @@ $(document).ready(function(){
         $.get("stop_server/"+serverid, function(data){
             console.log(data)   
             $.each(data, function(key, value){
-                $('.modal-body').html('<div id="alert-box" class="alert alert-'+key+' alert-dismissible">\
+                $('#msgs').html('<div id="alert-box" class="alert alert-'+key+' alert-dismissible">\
                   <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>\
                   <span id="server-response">'+value+'</span>\
                </div>')            

@@ -18,7 +18,7 @@
                                 <input type="hidden" name="server_id" value="{{ object.server.id }}">
                                 <input type="hidden" name="object_id" value="{{ object.id }}">
                             </form>
-                            <span class="span-cell">{{ object.name }}</span><!--Cell-->
+                            <span class="span-cell">{{ object.object_name }}</span><!--Cell-->
                             <span class="span-cell"><!--Begin Cell-->
                                 <a data-target="min-object-form-{{ object.id }}" class="btn btn-sm btn-warning del-obj-btn" href="#">Delete</a>
                             </span><!--End Cell-->
@@ -31,7 +31,7 @@
                                         <input type="hidden" name="server_id" value="{{ child_obj.server.id }}">
                                         <input type="hidden" name="object_id" value="{{ child_obj.id }}">
                                     </form>
-                                    <span class="span-cell"> <i style="position:relative;width:10px;top:3px" data-feather="corner-down-right"></i> {{ child_obj.name }}</span><!--Cell-->
+                                    <span class="span-cell"> <i style="position:relative;width:10px;top:3px" data-feather="corner-down-right"></i> {{ child_obj.object_name }}</span><!--Cell-->
                                     <span class="span-cell"><!--Begin Cell-->
                                         <a data-target="min-object-form-{{ child_obj.id }}" class="btn btn-sm btn-warning del-obj-btn" href="#">Delete</a>
                                     </span><!--End Cell-->
@@ -67,7 +67,7 @@
                     <option value='' >Select Parent Object</option>
                     {% for obj in objects %}
                         {% if obj.is_parent() %}
-                            <option value="{{ obj.id }}" >{{ obj.name }}</option>
+                            <option value="{{ obj.id }}" >{{ obj.object_name }}</option>
                         {% endif %}
                     {% endfor %}
                 {% else %}

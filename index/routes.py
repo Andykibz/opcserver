@@ -6,11 +6,36 @@ from . import utils
 from myserver import MyServer
 from myplc import MyPlc
 from snap7.snap7exceptions import Snap7Exception
+import time
 
-global ms,mp
-ms = MyServer()
-mp = MyPlc()
+class Control(MyServer,MyPlc):
+    def __init__(self):
+        self.ip = None        
 
+    def get_db(self, server_id,ip=None):
+        self.db_server = Server.query.get(server_id)
+        if ip is not None:
+            self.ip = ip
+        self.inits()
+    
+    def inits(self):
+        MyServer.__init__(self)
+        MyPlc.__init__(self)
+    
+    def set_opc(self):
+        self.instantiate_server_vars()
+
+    def make_tags_dict(self,allvars):
+        for var in allvars:
+            self.varsdict[var.variable_address] = {
+                'obj'   : self.opc_variables_dict[var.variable_address],
+                'type'  : var.variable_type
+            }
+
+
+
+# global ms,mp
+global ctrl
 ctrl = Control()
 
 @app.route("/")
@@ -23,7 +48,7 @@ def home():
 def create_server():
     form = ServerCreateForm()
     if form.validate_on_submit():
-        server = Server( name=form.server_name.data, endpoint_url=form.endpoint_url.data,namespace=form.namespace.data )
+        server = Server( server_name=form.server_name.data, server_endpoint_url=form.endpoint_url.data,server_namespace=form.namespace.data )
         db.session.add(server)
         db.session.commit()
         resp = {
@@ -49,10 +74,10 @@ def server_populate(serverid):
     server = Server.query.get( serverid )
     objform = ObjectCreateForm()
     varform = VariableCreateForm()
-    objects = server.objects
+    objects = server.server_objects
     varform.var_object.choices = utils.selectVals(objects)
     # objform.parent_object.choices = selectVals(objects)
-    # vars = server.objects
+    # vars = server.server_objects
     return render_template('server.html',
              objects=objects,
              server=server, 
@@ -61,44 +86,31 @@ def server_populate(serverid):
     )
 @app.route("/start_server/<serverid>",methods=['POST'])
 def start_server(serverid):
-    global ms
-    global mp
     if request.method=='POST' and request.form: 
-
         server = Server.query.get(request.form['server'])
-        plc_ip = request.form['plc_ip']
+        ctrl.get_db(server.id)
         try:
-            if isinstance(ms, MyServer) is False:
+            ctrl.opc_server.start()
+        except OSError as ipexp:
+            return jsonify({ 'warning':'The endpoint: {} is currently being used'.format(server.server_endpoint_url) })
+        else:     
+            ctrl.connections()            
+            return jsonify({ 'success':'PLC Connected' })
 
-        except NameError as nexp:
-            return 
-            ms = MyServer(server.id)
-        try:
-            ms.opc_server.start()
-            if plc_ip is not None:
-                mp = MyPlc( server.id, plc_ip )
-            else:
-                mp = MyPlc( server.id )
-        except OSError as err:
-            return jsonify({ "danger" : "The address and port at {} are being used by sbd/sth else".format(server.endpoint_url) })
-        except Snap7Exception as snap:            
-            return jsonify({ 'danger' :[ x if len(str(x)) > 5 else None for x in snap.args ]})
-        except Exception as exp:
-            return jsonify( { 'danger': [ x if len(str(x)) > 5 else None for x in exp.args ]} ) 
-        else:
-            return jsonify({ "success": "SERVER: {}, started at: {}".format(server.name,server.endpoint_url)} )     
+        return jsonify({ 'success':'Server running at {}'.format( server.server_endpoint_url ) })
+
     else:
         return jsonify("Web Server Error")
 
 
 @app.route("/stop_server/<serverid>",methods=['GET'])
 def stop_server(serverid):
-    global ms
-    global mp
-    ms.opc_server.stop()
-    mp.kill_threads()
-    del ms, mp
-    return jsonify({"info":"Server Stoped"})
+    server = Server.query.get( serverid )
+    ctrl.kill_threads()
+    ctrl.opc_server.stop()
+    return jsonify({"info":"Server at {} Stopped".format(server.server_endpoint_url)})
+    
+
 
 @app.route("/create_object",methods= ['POST'] )
 def create_object():
@@ -106,8 +118,8 @@ def create_object():
     
     serverobj = Server.query.get(objform.server.data)
     if request.method=='POST' and request.form:        
-        obj = Object(   name = request.form['object_name'],
-                        parent_id = request.form['parent_object'] if request.form['parent_object'] else None,
+        obj = Object(   object_name = request.form['object_name'],
+                        object_parent_id = request.form['parent_object'] if request.form['parent_object'] else None,
                         server = Server.query.get(request.form['server']) 
                     )
         db.session.add(obj)
@@ -120,27 +132,39 @@ def create_object():
 @app.route("/create_variable",methods= ['POST'] )
 def create_variable():
     varform = VariableCreateForm()
-    # return jsonify(varform.object.data)
     obj = Object.query.get(varform.var_object.data)
     if utils.custom_validation( varform.data ):
-        var = Variable( name=varform.name.data,
-                        type=varform.var_type.data,
-                        writable=varform.writable.data,
-                        tag_id=varform.tag.data,
-                        value=varform.value.data,
-                        object=Object.query.get(varform.var_object.data),
+                
+        if Variable.validate(varform.var_object.data,varform.address.data):
+            try:
+                var = Variable( variable_name=varform.name.data, variable_type=varform.var_type.data,
+                        variable_writable=varform.writable.data, variable_address=varform.address.data,
+                        variable_value=varform.value.data, object=Object.query.get(varform.var_object.data),
                          )
-        db.session.add(var)
-        db.session.commit()
-        resp={
-            'message' : '{} Created Successfully'.format(var.name),
-            'object'  : varform.data
-        }
-        return redirect( url_for('server_populate',serverid=obj.server.id) )
+            except AttributeError as aexp:
+                flash('Ensure all fields are filled','warning')                         
+                return redirect( url_for('server_populate',serverid=obj.server.id) )                             
+        else:
+            flash('The address {} has already been taken'.format(varform.address.data),'warning')                         
+            return redirect( url_for('server_populate',serverid=obj.server.id) )                         
+
+        
+        try:
+            db.session.add(var)
+            db.session.commit() 
+        except AttributeError as aexp:
+            flash('Ensure all fields are filled','warning')                         
+            return redirect( url_for('server_populate',serverid=obj.server.id) )                   
+        except Exception as exp:
+            flash('Could not save Variable'.format(varform.name.data))                
+        else:
+            flash('{} Created Successfully'.format(var.variable_name),'success')
+            return redirect(url_for('server_populate',serverid=obj.server.id))
+            
     else:    
-        flash('Could not create {} Variable'.format(varform.name.data))
+        flash( 'Could not create {} Variable'.format(varform.name.data), 'danger' )
         return redirect(url_for('server_populate',serverid=obj.server.id))
-        # return jsonify(request.data)
+
 
 @app.route("/variables/<var_id>/delete",methods= ['GET'] )
 def delete_var(var_id):
@@ -160,35 +184,3 @@ def delete_object():
     flash('{} Deleted SUccessfully'.format(objName), 'success')
     return redirect(url_for('server_populate',serverid=server_id))
     
-def server_start_util(server, plc_ip ,myserv, myplc):
-    danger = []
-    info = []
-    if isinstance(myserv,MyServer):
-        # Check if OPC Server is running
-        if isOpen(server.endpoint_url):
-            info.append[ "Server running at opc.tcp://"+server.endpoint_url ]
-            try:
-                # Connect to PLC 
-                if plc_ip is not None:
-                    myplc = MyPlc( serverid,plc_ip )
-                else:
-                    myplc = MyPlc( serverid )
-                info.append(["PLC Connected"])
-            except:
-                danger.append["Couldn't connect top plc at: "+plc_ip ]
-
-        else:
-            danger.append([ "Server failed to start at opc.tcp://"+server.endpoint_url+". Check log file" ])
-            
-    else:
-        # try:
-        myserv = MyServer( server.id )   
-            # server_start_util(server, plc_ip ,myserv, myplc, MYSERV, MYPLC)
-        # except:
-        #     danger.append(["Couldn't launch server"])
-    
-    msgs = {
-        'danger' : danger,
-        'info' : info,
-    }
-    return myserv, myplc, msgs  

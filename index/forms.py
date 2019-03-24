@@ -67,8 +67,8 @@ class VariableCreateForm( FlaskForm ):
                                             'placeholder': "Writable"
                                         }
                                 )
-    tag = StringField('Tag', validators=[ DataRequired() ],
-                            render_kw = { 'placeholder': "Tag ID"
+    address = StringField('Address', validators=[ DataRequired() ],
+                            render_kw = { 'placeholder': "Address"
                                 }
                             )
 

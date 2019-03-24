@@ -20,7 +20,7 @@
             <thead class="thead-light">
                 <tr class="row">
                     <th scope="col" class="col-2" >Name</th>
-                    <th scope="col" class="col-1" >Tag_ID</th>
+                    <th scope="col" class="col-1" >Address</th>
                     <th scope="col" class="col-2" >Type</th>
                     <th scope="col" class="col-1" >Writable</th>
                     <th scope="col" class="col-2" >Object Name</th>
@@ -30,19 +30,19 @@
             </thead>
             <tbody id="var-body">
                 {% for obj in objects %}
-                    {% for variable in obj.variables %}
+                    {% for variable in obj.object_variables %}
                         <tr id="var-{{ variable.id }}" class="row">
-                            <td class="col-2 pb-0">{{variable.name}}</td>
-                            <td class="col-1 pb-0">{{ variable.tag_id }}</td>
-                            <td class="col-2 pb-0" >{{ variable.type }}</td>
+                            <td class="col-2 pb-0">{{variable.variable_name}}</td>
+                            <td class="col-1 pb-0">{{ variable.variable_address }}</td>
+                            <td class="col-2 pb-0" >{{ variable.variable_type }}</td>
                             <td class="col-1 pb-0" > 
-                                {% if variable.writable %}  <i data-feather="check"></i> {% else %} <i data-feather="x-circle"></i> {% endif %}
+                                {% if variable.variable_writable %}  <i data-feather="check"></i> {% else %} <i data-feather="x-circle"></i> {% endif %}
                             </td>
-                            <td class="col-2 pb-0" >{{ variable.object.name }}</td>
-                            <td class="col-2 pb-0" >{{ variable.value }}</td>
+                            <td class="col-2 pb-0" >{{ variable.object.object_name }}</td>
+                            <td class="col-2 pb-0" >{{ variable.variable_value }}</td>
                             <td class="col-2 pb-0" >
                                 <p>
-                                    <a data-name="{{ variable.name }}" data-id="{{ variable.id }}" class="btn btn-danger btn-sm var-del-btn" href="{{ url_for('delete_var',var_id=variable.id ) }}"> Delete </i> </a>
+                                    <a data-name="{{ variable.variable_name }}" data-id="{{ variable.id }}" class="btn btn-danger btn-sm var-del-btn" href="{{ url_for('delete_var',var_id=variable.id ) }}"> Delete </i> </a>
                                 </p>
                             </td>
                         </tr>
@@ -84,7 +84,7 @@
                             <label class="custom-control-label" for="trueval">True</label>\
                         </div>\
                         <div class="custom-control custom-radio custom-control-inline">\
-                            <input type="radio" class="custom-control-input" id="falseval" name="value" value="False">\
+                            <input type="radio" class="custom-control-input" id="falseval" name="value" value="False" checked="checked">\
                             <label class="custom-control-label" for="falseval">False</label>\
                         </div>'
                     )

@@ -16,7 +16,7 @@ def selectVals(objs):
     if objs:
         for obj in objs:
             idlist.append(obj.id)
-            namelist.append(obj.name)
+            namelist.append(obj.object_name)
         return [(None,'Object')]+list(zip( idlist, namelist ))
     else:
         return [ (None, 'No Objects Defined' ) ]

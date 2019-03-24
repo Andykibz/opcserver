@@ -51,12 +51,12 @@
           {{ form.server_name( class="form-control", value="" ) }}
         </div>
 
-        <div class="col-4 input-group mb-3">
+        <div class="col-4 mb-3">
           {{ form.endpoint_url.label( class="form-control-label" ) }}
-          <div class="input-group">
+          <div class="input-goup">
             <div class="input-group-prepend">
               <span class="input-group-text" id="inputGroupPrepend">ocp.tcp://</span>
-              {{ form.endpoint_url(class="form-control col-12", value="") }}
+              {{ form.endpoint_url(class="form-control", value="") }}
             </div>
           </div>
         </div>
@@ -86,9 +86,9 @@
         {% for server in servers %}
         <tr class="row">
           <th scope="row" class="col-sm-1">{{ server.id }}</th>
-          <td class="col-sm-2">{{ server.name }}</td>
-          <td class="col-sm-2">{{ server.endpoint_url }}</td>
-          <td class="col-sm-3">{{ server.namespace }}</td>
+          <td class="col-sm-2">{{ server.server_name }}</td>
+          <td class="col-sm-2">{{ server.server_endpoint_url }}</td>
+          <td class="col-sm-3">{{ server.server_namespace }}</td>
           <td class="col-sm-3">
               <p>
                 <a class="btn btn-sm btn-secondary" href="{{ url_for('server_populate',serverid=server.id) }}"><i data-feather="edit"></i> </a>
