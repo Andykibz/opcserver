@@ -11,7 +11,48 @@
     {% endif %}
   {% endwith %}
 </div>
-<!-- Modal -->
+
+<!-- Edit Server Modal -->
+<div class="modal fade" id="edit-server-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form id="edit_projects_form" class="d-block mb-3" method="post" action="" autocomplete=false >
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">    
+                {{ form.hidden_tag() }}
+            <div class="form-row">
+              {{ form.server_name.label( class="form-control-label" ) }}
+              {{ form.server_name( class="form-control", value="" ) }}
+            </div>
+            <div class="form-row">
+              {{ form.endpoint_url.label( class="form-control-label" ) }}
+              <div class="input-goup">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="inputGroupPrepend">ocp.tcp://</span>
+                  {{ form.endpoint_url(class="form-control", value="") }}
+                </div>
+              </div>
+            </div>
+            <div class="form-row">
+              {{ form.namespace.label( class="form-control-label" ) }}
+              {{ form.namespace( class="form-control",value="" ) }}
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Start Server Modal -->
 <div class="modal fade config-server-modal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
@@ -91,6 +132,9 @@
           <td class="col-sm-3">{{ server.server_namespace }}</td>
           <td class="col-sm-3">
               <p>
+                <a  data-serverid="{{ server.id }}" data-name="{{ server.server_name }}" 
+                    data-epurl="{{ server.server_endpoint_url }}" data-namespace="{{ server.server_namespace }}"
+                   href="#" class="btn btn-success btn-sm edit-server-btn"> <i data-feather="edit-2"></i> </a>
                 <a class="btn btn-sm btn-secondary" href="{{ url_for('server_populate',serverid=server.id) }}"><i data-feather="edit"></i> </a>
                 <a data-server-id="{{ server.id }}" data-toggle="modal" data-target=".config-server-modal" class="btn btn-sm btn-info config-server" href="#"> <i data-feather="settings"></i> </a>
                 <a data-server="{{ server.id }}" role="button" class="btn btn-sm btn-warning delete-server" href="#"><i data-feather="trash"></i></a>

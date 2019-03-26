@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: s71200opc
+Version: 0.1.dev0
+Summary: UNKNOWN
+Home-page: UNKNOWN
+Author: Andrew Kibor
+Author-email: andykibz@gmail.com
+License: MIT
+Description: Connect PLC to opcserver
+Platform: UNKNOWN

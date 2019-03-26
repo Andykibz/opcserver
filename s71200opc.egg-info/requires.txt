@@ -1,0 +1,8 @@
+Flask
+opcua
+python-snap7
+SQLAlchemy
+Flask-SQLAlchemy
+cryptography
+WTForms
+Flask-WTF

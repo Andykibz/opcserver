@@ -61,24 +61,17 @@
 {% endblock %}}
 {% block javascripts %}
     {{ super() }}
-    <script>
-        $('#var_type').on('change',function(e){
-            vtype = $(this).val()
-            switch(vtype){
-                case 'int':
-                    $('#value-wrapper').html(
-                        '<input class="form-control" id="value" name="value" placeholder="Value" required="" type="number" value=0>'
-                    )
-                    break;
-
-                case 'string':
-                    $('#value-wrapper').html(
-                        '<input class="form-control" id="value" name="value" placeholder="Your String" required="" type="text" value="">'
-                    )                 
-                    break;   
-
-                case 'bool':
-                    $('#value-wrapper').html(
+    <script>            
+            $('#address').on('keyup',function(e){
+                const bool_check = /^.*(\d+)\.(\d)$/;
+                const int_check = /^.*(w|W)(\d+)$/;
+                const float_check = /^.*(d|D)(\d+)$/;
+                e.preventDefault()
+                    
+                 val = $(this).val()
+                 
+                if( bool_check.test(val) ){
+                    $('#input-box').html(
                         '<div class="custom-control custom-radio custom-control-inline">\
                             <input type="radio" class="custom-control-input" id="trueval" name="value" value="True">\
                             <label class="custom-control-label" for="trueval">True</label>\
@@ -87,19 +80,29 @@
                             <input type="radio" class="custom-control-input" id="falseval" name="value" value="False" checked="checked">\
                             <label class="custom-control-label" for="falseval">False</label>\
                         </div>'
+                        )
+                        $('#var_type').val('bool')
+                }
+                else if( int_check.test(val) ){
+                    $('#input-box').html(
+                        '<input class="form-control" id="value" name="value" placeholder="0.0"  type="number" value="0">'
                     )
-                    break;
-
-                case 'float':
-                    $('#value-wrapper').html(
-                        '<input class="form-control" id="value" name="value" placeholder="0.0" required="" type="number" value="0.0">'
+                    $('#var_type').val('int')
+                }
+                else if( float_check.test(val) ){
+                    $('#input-box').html(
+                        '<input class="form-control" id="value" name="value" placeholder="0" type="number" value="0.0">'
                     )
-                    break;
-                                                        
-
-            }
-            
-        });
+                    $('#var_type').val('float')
+                }
+                $('#refresh-val').on('click',function(e){
+                    e.preventDefault()
+                    $('#input-box').html(
+                        '<input class="form-control" id="value" name="value" placeholder="" type="text" value="">'
+                    )
+                    $('#var_type').val('NoneType')
+                });
+            })
     </script>
 {% endblock %}
 

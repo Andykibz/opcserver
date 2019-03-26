@@ -1,0 +1,1 @@
+This project allows creation of an opc server that can allow a plc to be connected to.

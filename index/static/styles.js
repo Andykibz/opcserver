@@ -54,6 +54,8 @@ $(document).ready(function(){
         });
     });
 
+
+    
     $('.stop-server').on('click', function(){
         // let serverid=$(this).attr('data-server-id')
         let serverid=$('input[name="serverID"]').val()
@@ -67,4 +69,16 @@ $(document).ready(function(){
             });
         });
     });
+
+    $('.edit-server-btn').on('click',function(e){ 
+        id = $(this).attr('data-serverid')
+        name = $(this).attr('data-name')
+        namespace = $(this).attr('data-namespace')
+        epurl = $(this).attr('data-epurl')
+        form = $('#projects_form').attr('action','server/'+id+'/edit')
+        $('[name="server_name"]').val(name);
+        $('[name="endpoint_url"]').val(epurl);
+        $('[name="namespace"]').val(namespace);
+    })
+
 });
